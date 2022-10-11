@@ -57,8 +57,13 @@ public class DocumentVerifyController {
 	}
 
 	@PostMapping("/globalFilter")
-	public HashMap<String, Object> globalFilter(HashMap<String, Object> gblFilter) throws ParseException {
+	public HashMap<String, Object> globalFilter(@RequestBody HashMap<String, Object> gblFilter) throws ParseException {
 		return serviceImpl.globalFilter(gblFilter);
+
+	}
+	@PostMapping("/globalFilter1")
+	public HashMap<String, Object> globalFilter1(@RequestBody HashMap<String, Object> gblFilter) throws ParseException {
+		return serviceImpl.globalFilter1(gblFilter);
 
 	}
 
@@ -71,6 +76,12 @@ public class DocumentVerifyController {
 	@PostMapping("/getcardList")
 	public HashMap<String, Object> getcardList(@RequestBody HashMap<String, Object> gblFilter) {
 		return serviceImpl.getcardList(gblFilter);
+
+	}
+	
+	@PostMapping("/torusClubCoinAllocation")
+	public HashMap<String, Object> torusClubCoinAllocation(@RequestBody HashMap<String, Object> torusClubCoinAllocation) {
+		return serviceImpl.torusClubCoinAllocation(torusClubCoinAllocation);
 
 	}
 }

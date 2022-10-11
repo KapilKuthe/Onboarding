@@ -159,7 +159,7 @@ public class DaoLayer {
 					.setParameter("Type", masterDdlRequest.get("Type"))
 					.setParameter("SelectedGuId", masterDdlRequest.get("SelectedGuId"));
 			list = query.getResultList();
-			
+
 			map.put("Data", list);
 			System.out.println(map);
 			return map;
@@ -276,16 +276,17 @@ public class DaoLayer {
 			return map;
 		}
 	}
-	
-	public HashMap<String, Object> globalFilter(HashMap<String, Object> gblFilter) {
-		
+
+	@SuppressWarnings("unchecked")
+	public HashMap<String, Object> globalFilter1(HashMap<String, Object> gblFilter) {
+		List<Jsondata> list = new ArrayList<>();
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		try {
-			StoredProcedureQuery query = emanager.createStoredProcedureQuery("GetMasterForDD")
-					.registerStoredProcedureParameter("SelectedGuId", String.class, ParameterMode.IN)
-					.setParameter("SelectedGuId", gblFilter.get("SelectedGuId"));
-			
-			map.put("data", query.getFirstResult());
+			StoredProcedureQuery query = emanager.createStoredProcedureQuery("USP_ENGlobalFilterlevel", "Jsondata")
+					.registerStoredProcedureParameter("Product", String.class, ParameterMode.IN)
+					.setParameter("Product", gblFilter.get("Product"));
+			list = query.getResultList();
+			map.put("data", list);
 			System.out.println(map);
 			return map;
 
@@ -297,19 +298,17 @@ public class DaoLayer {
 			return map;
 		}
 
-	
 	}
 
-	
 	public HashMap<String, Object> getDashboard(HashMap<String, Object> gettc) {
 		HashMap<String, Object> map = new HashMap<String, Object>();
-		
+
 		try {
 			StoredProcedureQuery query = emanager.createStoredProcedureQuery("USP_ENGetCoinAmount")
 					.registerStoredProcedureParameter("TokenID", String.class, ParameterMode.IN)
 					.setParameter("TokenID", gettc.get("TokenID"));
-			
-			map.put("data",query.getSingleResult());
+
+			map.put("data", query.getSingleResult());
 			System.out.println(map);
 			return map;
 
@@ -322,19 +321,22 @@ public class DaoLayer {
 		}
 
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public HashMap<String, Object> getcardList(HashMap<String, Object> gettc) {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		List<CardList> list = new ArrayList<>();
 		try {
-			StoredProcedureQuery query = emanager.createStoredProcedureQuery("USP_ENGetClubProductListing","ProductListing");
-					list=query.getResultList();
-			
-			map.put("data",list);
+			StoredProcedureQuery query = emanager
+					.createStoredProcedureQuery("USP_ENGetClubProductListing", "ProductListing")
+					.registerStoredProcedureParameter("Category", String.class, ParameterMode.IN)
+					.setParameter("Category", gettc.get("Category"));
+			list = query.getResultList();
+
+			map.put("data", list);
 			System.out.println(map);
 			return map;
-
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 			map.put("Data", null);
@@ -342,7 +344,31 @@ public class DaoLayer {
 			map.put("Status", 0);
 			return map;
 		}
+	}
+	
+	public HashMap<String, Object> torusClubCoinAllocation(HashMap<String, Object> gettc) {
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		
+		try {
+			StoredProcedureQuery query = emanager
+					.createStoredProcedureQuery("USP_ENGetClubProductListing")
+					.registerStoredProcedureParameter("TokenID", String.class, ParameterMode.IN)
+					.registerStoredProcedureParameter("url", String.class, ParameterMode.IN)
+					.setParameter("TokenID", gettc.get("TokenID"))
+					.setParameter("url", gettc.get("url"));
+			
 
+			map.put("data", query.getSingleResult());
+			System.out.println(map);
+			return map;
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			map.put("Data", null);
+			map.put("Error", e.toString());
+			map.put("Status", 0);
+			return map;
+		}
 	}
 
 }

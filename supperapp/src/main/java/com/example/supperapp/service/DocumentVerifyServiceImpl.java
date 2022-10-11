@@ -4,11 +4,17 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -338,7 +344,6 @@ public class DocumentVerifyServiceImpl implements DocumentVerifyService {
 		return responseData;
 	}
 
-	@SuppressWarnings("unchecked")
 	public HashMap<String, Object> globalFilter(HashMap<String, Object> gblFilter) throws ParseException {
 
 		LinkedHashMap<String, Object> submenu = new LinkedHashMap<>();
@@ -354,6 +359,7 @@ public class DocumentVerifyServiceImpl implements DocumentVerifyService {
 		List<LinkedHashMap<String, Object>> mainList = new ArrayList<>();
 		List<String> originalList = new ArrayList<>();
 		List<String> subLStrings = new ArrayList<>();
+
 		List<Jsondata> list = new ArrayList<>();
 
 		originalList.add(0, "Wealth");
@@ -379,11 +385,10 @@ public class DocumentVerifyServiceImpl implements DocumentVerifyService {
 		subLStrings.add(8, "Money maker");
 		subLStrings.add(9, "Equity");
 		subLStrings.add(10, "Equity");
-
 		for (int i = 0; i < originalList.size(); i++) {
 			jdataJsondata = new Jsondata();
-			jdataJsondata.setName(originalList.get(i));
-			jdataJsondata.setSubname(subLStrings.get(i));
+			jdataJsondata.setSubCategory(originalList.get(i));
+			jdataJsondata.setCategory(subLStrings.get(i));
 			list.add(i, jdataJsondata);
 			System.out.println(list.get(i));
 		}
@@ -392,8 +397,8 @@ public class DocumentVerifyServiceImpl implements DocumentVerifyService {
 
 		// logic
 		for (int i = 0; i < list.size(); i++) {
-			String grandparent = list.get(i).getName().toString();
-			if (list.get(i).getSubname().equalsIgnoreCase("NA")) {
+			String grandparent = list.get(i).getSubCategory().toString();
+			if (list.get(i).getCategory().equalsIgnoreCase("NA")) {
 				submenu = new LinkedHashMap<>();
 				submenu.put("name", grandparent);
 
@@ -402,25 +407,25 @@ public class DocumentVerifyServiceImpl implements DocumentVerifyService {
 					submenu1 = new LinkedHashMap<>();
 
 					int c = 0;
-					if (list.get(j).getSubname().equalsIgnoreCase(grandparent)) {
-						String parent = list.get(j).getName().toString();
-						submenu1.put("name", list.get(j).getName().toString());
+					if (list.get(j).getCategory().equalsIgnoreCase(grandparent)) {
+						String parent = list.get(j).getSubCategory().toString();
+						submenu1.put("name", list.get(j).getSubCategory().toString());
 
 						for (int k = 0; k < list.size(); k++) {
 							submenu2 = new LinkedHashMap<>();
 
 							int c1 = 0;
-							if (list.get(k).getSubname().equalsIgnoreCase(parent)) {
-								String child = list.get(k).getName().toString();
-								submenu2.put("name", list.get(k).getName().toString());
+							if (list.get(k).getCategory().equalsIgnoreCase(parent)) {
+								String child = list.get(k).getSubCategory().toString();
+								submenu2.put("name", list.get(k).getSubCategory().toString());
 
 								for (int l = 0; l < list.size(); l++) {
 									submenu3 = new LinkedHashMap<>();
 
 									int c2 = 0;
-									if (list.get(l).getSubname().equalsIgnoreCase(child)) {
+									if (list.get(l).getCategory().equalsIgnoreCase(child)) {
 
-										submenu3.put("name", list.get(l).getName().toString());
+										submenu3.put("name", list.get(l).getSubCategory().toString());
 										submenu3.put("hasLayer", "");
 										AMC3.add(c, submenu3);
 										c2++;
@@ -473,21 +478,95 @@ public class DocumentVerifyServiceImpl implements DocumentVerifyService {
 
 	}
 
-//	public HashMap<String, Object> filter(HashMap<String, Object> gettc) {
-//		HashMap<String, Object> filter = new HashMap<>();
-//		List<HashMap<String, Object>> AMC1 = new ArrayList<>();
-//		
-//		for (int i = 0; i < 2; i++) {
-//			filter = new HashMap<>();
-//			filter.put("id", i);
-//			filter.put("name", "sub level");
-//			AMC1.add(i, filter);
-//		}
-//		
-//		
-//		return gettc;
-//
-//	}
+	public HashMap<String, Object> globalFilter1(HashMap<String, Object> gblFilter) {
+		LinkedHashMap<String, Object> lvl0 = new LinkedHashMap<>();
+		LinkedHashMap<String, Object> lvl1 = new LinkedHashMap<>();
+		LinkedHashMap<String, Object> lvl2 = new LinkedHashMap<>();
+		LinkedHashMap<String, Object> lvl3 = new LinkedHashMap<>();
+		List<String> arrlist = new ArrayList<>();
+		List<HashMap<String, Object>> Arrlist0 = new ArrayList<>();
+		List<HashMap<String, Object>> Arrlist1 = new ArrayList<>();
+		List<HashMap<String, Object>> Arrlist2 = new ArrayList<>();
+		List<HashMap<String, Object>> arrEmpty = new ArrayList<>();
+
+		LinkedHashMap<String, Object> responseData = new LinkedHashMap<>();
+		HashMap<String, Object> getData = daoLayer.globalFilter1(gblFilter);
+
+		@SuppressWarnings("unchecked")
+		List<Jsondata> list = (List<Jsondata>) getData.get("data");
+
+		for (int i = 0; i < list.size(); i++) {
+			String grandparent = list.get(i).getCategory().toString();
+			if (list.get(i).getSubCategory().equalsIgnoreCase("NA")) {
+				arrlist.add(i, grandparent);
+			} else {
+				continue;
+			}
+		}
+		responseData.put("Orderlist", arrlist);
+
+		// logic
+		for (int i = 0; i < list.size(); i++) {
+			String grandparent = list.get(i).getCategory().toString();
+			if (list.get(i).getSubCategory().equalsIgnoreCase("NA")) {
+				lvl0 = new LinkedHashMap<>();
+//				lvl0.put("name", grandparent);
+
+				Arrlist1 = new ArrayList<>();
+				for (int j = 0; j < list.size(); j++) {
+					lvl1 = new LinkedHashMap<>();
+
+					int c = 0;
+					if (list.get(j).getSubCategory().equalsIgnoreCase(grandparent)) {
+						String parent = list.get(j).getCategory().toString();
+						lvl1.put("name", list.get(j).getCategory().toString());
+
+						for (int k = 0; k < list.size(); k++) {
+							lvl2 = new LinkedHashMap<>();
+
+							int c1 = 0;
+							if (list.get(k).getSubCategory().equalsIgnoreCase(parent)) {
+								String child = list.get(k).getCategory().toString();
+								lvl2.put("name", list.get(k).getCategory().toString());
+
+//								Arrlist3 = new ArrayList<>();
+								lvl2.put("hasLayer", arrEmpty);
+								Arrlist2.add(c, lvl2);
+								c1++;
+							}
+							if (Arrlist2.isEmpty()) {
+								lvl1.put("hasLayer", arrEmpty);
+								continue;
+							} else {
+								lvl1.put("hasLayer", Arrlist2);
+							}
+
+						}
+//								submenu1.put("hasLayer", "");
+						Arrlist2 = new ArrayList<>();
+						Arrlist1.add(c, lvl1);
+						c++;
+					}
+					if (Arrlist1.isEmpty()) {
+						lvl0.put("hasLayer", arrEmpty);
+						continue;
+					} else {
+						lvl0.put("hasLayer", Arrlist1);
+					}
+
+				}
+//					submenu.put("hasLayer",AMC1);
+//				Arrlist0.add(i, lvl0);
+				responseData.put(grandparent, Arrlist1);
+
+			} else {
+				continue;
+			}
+		}
+
+		return responseData;
+
+	}
 
 	public HashMap<String, Object> getDashboard(HashMap<String, Object> gettc) {
 		HashMap<String, Object> responseData = new HashMap<>();
@@ -511,45 +590,393 @@ public class DocumentVerifyServiceImpl implements DocumentVerifyService {
 
 	}
 
-	@SuppressWarnings({ "unchecked", "unused" })
+	@SuppressWarnings({ "unchecked", "unused", "null" })
 	public HashMap<String, Object> getcardList(HashMap<String, Object> gettc) {
-
+		LinkedHashMap<String, Object> responseData = new LinkedHashMap<>();
 		LinkedHashMap<String, Object> data = new LinkedHashMap<>();
 		LinkedHashMap<String, Object> data1 = new LinkedHashMap<>();
-		List<HashMap<String, Object>> subLStrings = new ArrayList<>();
+		LinkedHashMap<String, Object> data2 = new LinkedHashMap<>();
+		LinkedHashMap<String, Object> data3 = new LinkedHashMap<>();
+		LinkedHashMap<String, Object> data4 = new LinkedHashMap<>();
+		LinkedHashMap<String, Object> data5 = new LinkedHashMap<>();
+		LinkedHashMap<String, Object> data6 = new LinkedHashMap<>();
+		LinkedHashMap<String, Object> data7 = new LinkedHashMap<>();
+
+		List<HashMap<String, Object>> jackPot = new ArrayList<>();
+		List<HashMap<String, Object>> upcomingJackPot = new ArrayList<>();
+		List<HashMap<String, Object>> vouchers = new ArrayList<>();
+		List<HashMap<String, Object>> giftCards = new ArrayList<>();
+		List<HashMap<String, Object>> cashback = new ArrayList<>();
+		List<HashMap<String, Object>> ourbrand = new ArrayList<>();
+		List<HashMap<String, Object>> referearn = new ArrayList<>();
+		List<HashMap<String, Object>> allData = new ArrayList<>();
 
 		HashMap<String, Object> getData = daoLayer.getcardList(gettc);
 		List<CardList> list = (List<CardList>) getData.get("data");
 
 		// JackPot Rewards
-		data1.put("Title", "JackPot Rewards");
-		data1.put("count", list.size());
-		data1.put("rewardDetail", "Spin and win vouchers,coins and big prizes");
 		for (int i = 0; i < list.size(); i++) {
 			data = new LinkedHashMap<>();
+			int c = 0;
+			if (list.get(i).getCardType().equalsIgnoreCase("JackPot")) {
+				Double minPriceDouble = list.get(i).getMinPrice();
+				Double maxPriceDouble = list.get(i).getMaxPrice();
+
+				data.put("desImg", list.get(i).getSmallImages());
+				data.put("rewardBackgroundColor", "cromaBAckGroundImg");
+				data.put("cardType", list.get(i).getCardType());
+				data.put("title", list.get(i).getProductName());
+				data.put("des", list.get(i).getDescription());
+				if (minPriceDouble == null || minPriceDouble == 0.0) {
+					data.put("prize", "Upto " + list.get(i).getMaxPrice());
+				} else if (minPriceDouble == null && maxPriceDouble == null) {
+					data.put("prize", "");
+				} else {
+					data.put("prize", list.get(i).getMinPrice() + "-" + list.get(i).getMaxPrice());
+				}
+				data.put("btnName", "Claim Now");
+				data.put("btnColor", "btnColor");
+				jackPot.add(c, data);
+				c++;
+			} else {
+				continue;
+			}
+		}
+		data1.put("Title", "JackPot Rewards");
+		data1.put("count", jackPot.size());
+		data1.put("rewardDetail", "Spin and win vouchers,coins and big prizes");
+		data1.put("col", "9");
+		data1.put("type", "grid");
+		data1.put("size", "custSizeJackpot");
+		data1.put("jackpotReward", jackPot);
+
+		// Upcoming JackPot Rewards
+		for (int i = 0; i < list.size(); i++) {
+			data = new LinkedHashMap<>();
+//			Date currentDate=java.time.LocalDate.now()
+			int c = 0;
+			if (list.get(i).getCardType().equalsIgnoreCase("JackPot")) {
+				if (list.get(i).getStartDate().after(new Date())) {
+					Double minPriceDouble = list.get(i).getMinPrice();
+					Double maxPriceDouble = list.get(i).getMaxPrice();
+
+					data.put("desImg", list.get(i).getSmallImages());
+					data.put("rewardBackgroundColor", "cromaBAckGroundImg");
+					data.put("cardType", list.get(i).getCardType());
+					data.put("title", list.get(i).getProductName());
+					data.put("des", list.get(i).getDescription());
+					if (minPriceDouble == null || minPriceDouble == 0.0) {
+						data.put("prize", "Upto " + list.get(i).getMaxPrice());
+					} else if (minPriceDouble == null && maxPriceDouble == null) {
+						data.put("prize", "");
+					} else {
+						data.put("prize", list.get(i).getMinPrice() + "-" + list.get(i).getMaxPrice());
+					}
+					data.put("btnName", "🔒Locked");
+					data.put("availability", "Available from 22Mar");
+					data.put("btnColor", "btnColor");
+					upcomingJackPot.add(c, data);
+					c++;
+				} else {
+					continue;
+				}
+
+			} else {
+				continue;
+			}
+		}
+		data2.put("Title", "Upcoming JackPot Rewards");
+		data2.put("count", upcomingJackPot.size());
+		data2.put("rewardDetail", "Spin and win vouchers,coins and big prizes");
+		data2.put("col", "9");
+		data2.put("type", "grid");
+		data2.put("size", "custSizeUpcomingJackpot");
+		data2.put("jackpotReward", upcomingJackPot);
+
+		// Vouchers Rewards
+		for (int i = 0; i < list.size(); i++) {
+			data = new LinkedHashMap<>();
+			int c = 0;
+			if (list.get(i).getCardType().equalsIgnoreCase("Vouchers")) {
+				Double minPriceDouble = list.get(i).getMinPrice();
+				Double maxPriceDouble = list.get(i).getMaxPrice();
+
+				data.put("desImg", list.get(i).getSmallImages());
+				data.put("rewardBackgroundColor", "cromaBAckGroundImg");
+				data.put("cardType", list.get(i).getCardType());
+				data.put("title", list.get(i).getProductName());
+				data.put("des", list.get(i).getDescription());
+				if (minPriceDouble == null || minPriceDouble == 0.0) {
+					data.put("prize", "Upto " + list.get(i).getMaxPrice());
+				} else if (minPriceDouble == null && maxPriceDouble == null) {
+					data.put("prize", "");
+				} else {
+					data.put("prize", list.get(i).getMinPrice() + "-" + list.get(i).getMaxPrice());
+				}
+				if (list.get(i).getStartDate().after(new Date())) {
+					data.put("btnName", "🔒Locked");
+				} else {
+					data.put("btnName", "Claim Now");
+				}
+				data.put("btnColor", "btnColor");
+				vouchers.add(c, data);
+				c++;
+			} else {
+				continue;
+			}
+		}
+		data3.put("Title", "Vouchers");
+		data3.put("count", vouchers.size());
+		data3.put("rewardDetail", "Play and win assured voucher on these brands");
+		data3.put("col", "7");
+		data3.put("type", "grid");
+		data3.put("size", "custSizeVoucher");
+		data3.put("jackpotReward", vouchers);
+
+		// giftCards Rewards
+		for (int i = 0; i < list.size(); i++) {
+			data = new LinkedHashMap<>();
+			int c = 0;
+			if (list.get(i).getCardType().equalsIgnoreCase("Gift Cards")) {
+				Double minPriceDouble = list.get(i).getMinPrice();
+				Double maxPriceDouble = list.get(i).getMaxPrice();
+
+				data.put("desImg", list.get(i).getSmallImages());
+				data.put("rewardBackgroundColor", "custBackgroundBlue");
+				data.put("cardType", list.get(i).getCardType());
+				data.put("title", list.get(i).getProductName());
+				data.put("des", list.get(i).getDescription());
+				if (minPriceDouble == null || minPriceDouble == 0.0) {
+					data.put("prize", "Upto " + list.get(i).getMaxPrice());
+				} else if (minPriceDouble == null && maxPriceDouble == null) {
+					data.put("prize", "");
+				} else {
+					data.put("prize", list.get(i).getMinPrice() + "-" + list.get(i).getMaxPrice());
+				}
+				if (list.get(i).getStartDate().after(new Date())) {
+					data.put("btnName", "🔒Locked");
+				} else {
+					data.put("btnName", "Claim Now");
+				}
+				data.put("btnColor", "btnColor");
+				giftCards.add(c, data);
+				c++;
+			} else {
+				continue;
+			}
+		}
+		data4.put("Title", "Gift Cards");
+		data4.put("count", giftCards.size());
+		data4.put("rewardDetail", "Play and win assured voucher on these brands");
+		data4.put("col", "7");
+		data4.put("type", "grid");
+		data4.put("size", "custSizeGiftCard");
+		data4.put("jackpotReward", giftCards);
+
+		// Cash Back Rewards
+		for (int i = 0; i < list.size(); i++) {
+			data = new LinkedHashMap<>();
+			int c = 0;
+			if (list.get(i).getCardType().equalsIgnoreCase("CashBack")) {
+				Double minPriceDouble = list.get(i).getMinPrice();
+				Double maxPriceDouble = list.get(i).getMaxPrice();
+
+				data.put("desImg", list.get(i).getSmallImages());
+				data.put("rewardBackgroundColor", "custBackgroundBlue");
+				data.put("cardType", list.get(i).getCardType());
+				data.put("title", list.get(i).getProductName());
+				data.put("des", list.get(i).getDescription());
+				if (minPriceDouble == null || minPriceDouble == 0.0) {
+					data.put("prize", "Upto " + list.get(i).getMaxPrice());
+				} else if (minPriceDouble == null && maxPriceDouble == null) {
+					data.put("prize", "");
+				} else {
+					data.put("prize", list.get(i).getMinPrice() + "-" + list.get(i).getMaxPrice());
+				}
+				if (list.get(i).getStartDate().after(new Date())) {
+					data.put("btnName", "🔒Locked");
+				} else {
+					data.put("btnName", "Claim Now");
+				}
+				data.put("btnColor", "btnColor");
+				cashback.add(c, data);
+				c++;
+			} else {
+				continue;
+			}
+		}
+		data5.put("Title", "Cash Back");
+		data5.put("count", cashback.size());
+		data5.put("rewardDetail", "Unlock cashback rewards by investing more");
+		data5.put("col", "8");
+		data5.put("type", "grid");
+		data5.put("size", "custSizeGiftCard");
+		data5.put("jackpotReward", cashback);
+
+		// Our Brand Partners
+		String[] words;
+		String strTitle;
+		List<String> wordList = new ArrayList<String>();
+		List<String> uniqueList = new ArrayList<String>();
+		List<CardList> brandlist = new ArrayList<CardList>();
+		for (int l = 0; l < list.size(); l++) {
+			strTitle = list.get(l).getProductName();
+
+			int c = 0;
+			if (strTitle == null) {
+				continue;
+			} else {
+				words = strTitle.split("[\\W_]+");
+				strTitle = words[0].toString();
+				wordList.add(c, strTitle);
+				uniqueList = wordList.stream().distinct().collect(Collectors.toList());
+				CardList blist = list.get(l);
+				brandlist.add(blist);
+				c++;
+			}
+		}
+
+//		System.out.println("the internal brand list: " + brandlist.size());
+		for (int i = 0; i < brandlist.size(); i++) {
+			data = new LinkedHashMap<>();
+			int c = 0;
+			if (list.get(i).getCardType().equalsIgnoreCase("Brand")) {
+				Double minPriceDouble = brandlist.get(i).getMinPrice();
+				Double maxPriceDouble = brandlist.get(i).getMaxPrice();
+
+				data.put("desImg", brandlist.get(i).getSmallImages());
+				data.put("rewardBackgroundColor", "cromaBAckGroundImg");
+				data.put("cardType", brandlist.get(i).getCardType());
+				data.put("title", brandlist.get(i).getProductName());
+				data.put("des", brandlist.get(i).getDescription());
+				if (minPriceDouble == null || minPriceDouble == 0.0) {
+					data.put("prize", "Upto " + brandlist.get(i).getMaxPrice());
+				} else if (minPriceDouble == null && maxPriceDouble == null) {
+					data.put("prize", "");
+				} else {
+					data.put("prize", brandlist.get(i).getMinPrice() + "-" + brandlist.get(i).getMaxPrice());
+				}
+				data.put("btnName", "Claim Now");
+				data.put("btnColor", "btnColor");
+				ourbrand.add(c, data);
+				c++;
+			} else {
+				continue;
+			}
+		}
+		data6.put("Title", "Our Brand Partners");
+		data6.put("count", "0");
+		data6.put("rewardDetail", "Choose a brand to view all of their available rewards ");
+		data6.put("col", "6");
+		data6.put("type", "grid");
+		data6.put("size", "custSizeVoucher");
+		data6.put("jackpotReward", ourbrand);
+
+		// Refer & Earn
+		for (int i = 0; i < 1; i++) {
+			data = new LinkedHashMap<>();
 			Double minPriceDouble = list.get(i).getMinPrice();
+
 			Double maxPriceDouble = list.get(i).getMaxPrice();
 
-			data.put("desImg", list.get(i).getSmallImages());
-			data.put("cardType", "jackPot");
-			data.put("title", list.get(i).getProductName());
-			data.put("des", list.get(i).getDescription());
+			data.put("desImg", "");
+			data.put("rewardBackgroundColor", "cromaBAckGroundImg");
+			data.put("cardType", "");
+			data.put("title", "");
+			data.put("des", "");
 			if (minPriceDouble == null || minPriceDouble == 0.0) {
-				data.put("prize", "Upto " + list.get(i).getMaxPrice());
+				data.put("prize", "Upto 1000");
 			} else if (minPriceDouble == null && maxPriceDouble == null) {
 				data.put("prize", "");
 			} else {
-				data.put("prize", list.get(i).getMinPrice() + "-" + list.get(i).getMaxPrice());
+				data.put("prize", "");
 			}
-			subLStrings.add(i, data);
-		}
-		data1.put("jackpotReward", subLStrings);
+			data.put("btnName", "Claim Now");
+			data.put("btnColor", "btnColor");
+			referearn.add(i, data);
 
-		return data1;
+		}
+		data7.put("Title", "Refer & Earn");
+		data7.put("count", "0");
+		data7.put("rewardDetail", "Refer a friend and earn assured cashback when they invest here");
+		data7.put("col", "12");
+		data7.put("type", "grid");
+		data7.put("size", "custSizeVoucher");
+		data7.put("jackpotReward", referearn);
+
+		// final data
+		allData.add(0, data1);
+		allData.add(1, data2);
+		allData.add(2, data3);
+		allData.add(3, data4);
+		allData.add(4, data5);
+		allData.add(5, data6);
+		allData.add(6, data7);
+
+		responseData.put("allData", allData);
+		responseData.put("coin", torusClubCoinAllocation(gettc));
+		return responseData;
 	}
 
-	private boolean IsEmpty(Collection<?> collection) {
-		return collection == null || collection.isEmpty();
+	public HashMap<String, Object> torusClubCoinAllocation(HashMap<String, Object> map) {
+		String urlmapping = res.getRequestURI();
+		map.put("url", urlmapping);
+//		System.out.println(map);
+		
+		LinkedHashMap<String, Object> data = new LinkedHashMap<>();
+		LinkedHashMap<String, Object> subData = new LinkedHashMap<>();
+		LinkedHashMap<String, Object> scrollingCardList = new LinkedHashMap<>();
+		LinkedHashMap<String, Object> cardList = new LinkedHashMap<>();
+
+		List<HashMap<String, Object>> scrollingCard = new ArrayList<>();
+		List<HashMap<String, Object>> card = new ArrayList<>();
+
+		if(map.get("url").equals("") || map.get("url").equals(null) )
+		{
+//			 data;
+		}
+		
+		
+		data.put("giftpop", "/assets/icon/fataka.svg");
+		data.put("title", "Congrats! You won");
+		data.put("icon", "/assets/icon/torusT.svg");
+		data.put("prize", "2,300 coins");
+		data.put("subtitle", "Win exciting rewards");
+		data.put("subtitles", "Stand a chance to win coin, cashback, vouchers or gift.");
+
+		// scrollingCard List
+		for (int i = 0; i < 3; i++) {
+			scrollingCardList = new LinkedHashMap<>();
+			
+			scrollingCardList.put("title","");
+			scrollingCardList.put("subtitle","");
+			scrollingCardList.put("icon","");
+			scrollingCardList.put("arrow","");
+			
+			scrollingCard.add(i,scrollingCardList);
+		}
+
+		data.put("scrollingCard", scrollingCard);
+
+		// scrollingCard List
+		for (int i = 0; i < 1; i++) {
+			cardList = new LinkedHashMap<>();
+			
+			cardList.put("title","");
+			cardList.put("subtitle","");
+			cardList.put("prize","");
+			cardList.put("icon","");
+			cardList.put("btn","");
+			
+			card.add(i,cardList);
+		}
+		data.put("Card", card);
+
+		data.put("closeBtn", "Close");
+		data.put("torusBtn", "Go To Torus Club");
+		
+		return data;
+		
 	}
 
 }

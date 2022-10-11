@@ -34,8 +34,12 @@ import lombok.Setter;
 		@ColumnResult(name = "MobileImages",type = String.class),
 		@ColumnResult(name = "BaseImages",type = String.class),
 		@ColumnResult(name = "SmallImages",type = String.class),
+		@ColumnResult(name = "CardType",type = String.class),
+		@ColumnResult(name = "Category",type = String.class),
 		@ColumnResult(name = "CreatedOnAt",type = Date.class),
-		@ColumnResult(name = "UpdatedOnAt",type = Date.class)
+		@ColumnResult(name = "UpdatedOnAt",type = Date.class),
+		@ColumnResult(name = "StartDate",type = Date.class),
+		@ColumnResult(name = "EndDate",type = Date.class)
 				
 }))
 public class CardList {
@@ -54,9 +58,12 @@ public class CardList {
 	private String MobileImages;
 	private String BaseImages;
 	private String SmallImages;
+	private String CardType;
+	private String Category;
 	private Date CreatedOnAt;
 	private Date UpdatedOnAt;
+	private Date StartDate;
+	private Date EndDate;
 	
-	
-	
+		
 }

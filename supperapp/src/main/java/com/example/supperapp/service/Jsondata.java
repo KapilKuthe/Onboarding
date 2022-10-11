@@ -8,33 +8,34 @@ import javax.persistence.ConstructorResult;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.SqlResultSetMapping;
-
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-
-
 @Entity
+@SqlResultSetMapping(name = "Jsondata",classes = @ConstructorResult(targetClass = Jsondata.class,columns = {
+		@ColumnResult(name = "SubCategory",type = String.class),
+		@ColumnResult(name = "Category",type = String.class)				
+}))
 public class Jsondata {
  @Id
- private String name;
-	private String subname;
-	public String getName() {
-		return name;
+
+ private String SubCategory;
+
+	private String Category;
+	public String getSubCategory() {
+		return SubCategory;
 	}
-	public void setName(String name) {
-		this.name = name;
+	public void setSubCategory(String subCategory) {
+		SubCategory = subCategory;
 	}
-	public String getSubname() {
-		return subname;
+	public String getCategory() {
+		return Category;
 	}
-	public void setSubname(String subname) {
-		this.subname = subname;
+	public void setCategory(String category) {
+		Category = category;
 	}
-	public Jsondata(String name, String subname) {
+	public Jsondata(String subCategory, String category) {
 		super();
-		this.name = name;
-		this.subname = subname;
+		SubCategory = subCategory;
+		Category = category;
 	}
 	public Jsondata() {
 		super();
@@ -42,10 +43,9 @@ public class Jsondata {
 	}
 	@Override
 	public String toString() {
-		return "Jsondata [name=" + name + ", subname=" + subname + "]";
+		return "Jsondata [SubCategory=" + SubCategory + ", Category=" + Category + "]";
 	}
- 
-
+	
 
 
 
